@@ -17,6 +17,14 @@ export const ACTIONS = {
 function reducer(state, {type, payload}) {
   switch(type) {
     case ACTIONS.ADD_NUMBER:
+      if (state.overwrite) {
+        return{
+          ...state,
+          currentOperand: payload.number,
+          overwrite: false,
+        }
+      }
+
       if (payload.number === "0" && state.currentOperand === "0") {
         return state
       }
@@ -33,6 +41,13 @@ function reducer(state, {type, payload}) {
     case ACTIONS.CHOOSE_OPERATION:
       if (state.currentOperand == null && state.previousOperand == null) {
         return state
+      }
+
+      if (state.currentOperand == null) {
+        return{
+          ...state,
+          operation: payload.operation,
+        };
       }
 
       if (state.previousOperand == null) {
@@ -53,6 +68,46 @@ function reducer(state, {type, payload}) {
 
     case ACTIONS.CLEAR:
       return {}
+
+    case ACTIONS.EQUALS:
+      if (
+        state.operation == null ||
+        state.currentOperand == null ||
+        state.previousOperand == null
+      ) {
+        return state
+      }
+
+      return {
+        ...state,
+        overwrite: true,
+        previousOperand: null,
+        operation: null,
+        currentOperand: equals(state)
+      }
+
+    case ACTIONS.DELETE_NUMBER:
+      if (state.overwrite) {
+        return {
+          ...state,
+          overwrite: false,
+          currentOperand: null
+        }
+      }
+
+      if (state.currentOperand == null) return state
+
+      if (state.currentOperand.length == 1) {
+        return {
+          ...state,
+          currentOperand: null
+        }
+      }
+
+      return {
+        ...state,
+        currentOperand: state.currentOperand.slice(0, -1)
+      }
   }
 }
 
